@@ -8,7 +8,6 @@ import {
 function App() {
   useEditorPanelConfig([
     { type: 'text', name: 'BackgroundColorHex', allowedTypes: ['text', 'string'], defaultValue: 'ffffff' },
-    { type: 'text', name: 'BackgroundColorHex2', allowedTypes: ['text', 'string'], defaultValue: 'ffffff' },
     {
       type: 'action-trigger',
       name: 'onLoadAction',
