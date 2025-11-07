@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Heroku dyno entrypoint for nginx static site
+# Ensure dist exists (built during release phase via heroku-buildpack-nodejs or custom buildpack chain)
+if [ ! -d "dist" ]; then
+  echo "dist directory not found. Did the build step run?" >&2
+  exit 1
+fi
+
+# Render nginx config from ERB template if needed
+if [ -f config/nginx-static.conf.erb ]; then
+  echo "Rendering nginx config from ERB template..."
+  erb config/nginx-static.conf.erb > config/nginx-static.conf
+fi
+
+# Run nginx with our rendered config
+exec nginx -c $PWD/config/nginx-static.conf
