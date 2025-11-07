@@ -8,12 +8,10 @@ error_log stderr info;
 # As documented for Nginx, but we still see error during start-up in log:
 # >  nginx: [alert] could not open error log file: open() "./logs/error.log"
 
-worker_processes <%= ENV['NGINX_WORKERS'] || 4 %>;
+worker_processes <%= ENV['NGINX_WORKERS'] || 1 %>;
 # Heroku dynos have at least 4 cores.
 
 events {
-	use epoll;
-	accept_mutex on;
 	worker_connections <%= ENV['NGINX_WORKER_CONNECTIONS'] || 1024 %>;
 }
 
@@ -42,16 +40,13 @@ http {
 		keepalive_timeout 5;
 		client_max_body_size <%= ENV['NGINX_CLIENT_MAX_BODY_SIZE'] || 1 %>M;
 
-		## HTTPS Only
-		if ($http_x_forwarded_proto != "https") {
-			return 301 https://$host$request_uri;
-		}
+		# Note: Heroku terminates SSL at the router; avoid forcing HTTPS here to prevent redirect loops.
 
 		## Document root
 		root /app/dist;
 
-		# Serve precompressed gzip if available (Vite can produce them via plugin; not enabled by default)
-		gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+		# Serve precompressed gzip types if available (safe defaults)
+		gzip_types text/plain text/css application/json application/javascript text/xml application/xml image/svg+xml;
 
 		location / {
 			# For SPA client-side routing, if file not found, serve index.html
